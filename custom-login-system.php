@@ -1,8 +1,4 @@
 <?php
-/**
- * Custom Login System for Amelia Customers
- * Paste this entire code into WPCode (Code Snippets > Add New > PHP Snippet)
- */
 
 // 1. REDIRECT LOGGED-IN USERS FROM /account TO /dashboard
 add_action('template_redirect', 'custom_redirect_logged_in_users');
@@ -230,6 +226,83 @@ function custom_login_form_shortcode() {
 
         .account-form-container .login-step.active p.user-email-display {
             margin-bottom: -7px;
+        }
+
+        /* Tablet responsiveness */
+        @media screen and (max-width: 768px) {
+            .account-form-container {
+                width: 90%;
+                padding: 25px 18px 35px;
+                gap: 18px !important;
+            }
+
+            .account-form-container label {
+                font-size: 15px;
+            }
+
+            .account-form-container input,
+            .account-form-container button.submit-btn,
+            .user-email-display {
+                height: 42px;
+                font-size: 15px;
+            }
+
+            .account-form-container a {
+                font-size: 13px;
+            }
+        }
+
+        /* Mobile responsiveness */
+        @media screen and (max-width: 480px) {
+            .account-page-custom {
+                padding: 20px;
+            }
+
+            .account-form-container {
+                width: 100%;
+                padding: 20px 15px 30px;
+                gap: 15px !important;
+                border-radius: 20px;
+            }
+
+            .account-form-container label {
+                font-size: 14px;
+            }
+
+            .account-form-container input,
+            .account-form-container button.submit-btn,
+            .user-email-display {
+                height: 40px;
+                font-size: 14px;
+                padding: 10px;
+            }
+
+            .account-form-container a {
+                font-size: 12px;
+            }
+
+            .login-step form {
+                gap: 12px;
+            }
+
+            .message {
+                padding: 10px;
+                font-size: 13px;
+            }
+        }
+
+        /* Small mobile */
+        @media screen and (max-width: 360px) {
+            .account-form-container {
+                padding: 18px 12px 25px;
+            }
+
+            .account-form-container input,
+            .account-form-container button.submit-btn,
+            .user-email-display {
+                height: 38px;
+                font-size: 13px;
+            }
         }
     </style>
 
