@@ -35,7 +35,18 @@ function custom_login_form_shortcode() {
                     <button type="submit" class="submit-btn">Submit</button>
                     <div class="message"></div>
                 </form>
-                <a href="#">Forgot password?</a>
+                <a href="#" id="forgot-password-link">Forgot password?</a>
+            </div>
+
+            <!-- Step 1b: Forgot Password -->
+            <div id="forgot-password-step" class="login-step">
+                <label for="reset-email">Enter your email to reset your password.</label>
+                <form id="forgot-password-form">
+                    <input type="email" id="reset-email" name="reset_email" placeholder="Email" required>
+                    <button type="submit" class="submit-btn">Send Reset Link</button>
+                    <div class="message"></div>
+                </form>
+                <a href="#" id="back-to-login">Back to login</a>
             </div>
 
             <!-- Step 2: Set Password (First-time users) -->
@@ -46,6 +57,19 @@ function custom_login_form_shortcode() {
                     <input type="password" id="new-password" name="new_password" placeholder="New Password (min 8 characters)" required minlength="8">
                     <input type="password" id="confirm-password" name="confirm_password" placeholder="Confirm Password" required minlength="8">
                     <button type="submit" class="submit-btn">Set Password</button>
+                    <div class="message"></div>
+                </form>
+            </div>
+
+            <!-- Step 2b: Reset Password (From email link) -->
+            <div id="reset-password-step" class="login-step">
+                <label>Reset your password.</label>
+                <form id="reset-password-form">
+                    <input type="hidden" id="reset-key" name="reset_key">
+                    <input type="hidden" id="reset-login" name="reset_login">
+                    <input type="password" id="reset-new-password" name="reset_new_password" placeholder="New Password (min 8 characters)" required minlength="8">
+                    <input type="password" id="reset-confirm-password" name="reset_confirm_password" placeholder="Confirm Password" required minlength="8">
+                    <button type="submit" class="submit-btn">Reset Password</button>
                     <div class="message"></div>
                 </form>
             </div>
@@ -209,6 +233,88 @@ function custom_login_form_shortcode() {
     jQuery(document).ready(function($) {
         let userEmail = '';
 
+        // Check if URL has reset parameters
+        const urlParams = new URLSearchParams(window.location.search);
+        const resetKey = urlParams.get('key');
+        const resetLogin = urlParams.get('login');
+
+        if (resetKey && resetLogin) {
+            // Show reset password form
+            $('#reset-key').val(resetKey);
+            $('#reset-login').val(resetLogin);
+            showStep('reset-password-step');
+        }
+
+        // Forgot password link
+        $('#forgot-password-link').on('click', function(e) {
+            e.preventDefault();
+            showStep('forgot-password-step');
+        });
+
+        // Back to login
+        $('#back-to-login').on('click', function(e) {
+            e.preventDefault();
+            showStep('email-step');
+        });
+
+        // Forgot password form submission
+        $('#forgot-password-form').on('submit', function(e) {
+            e.preventDefault();
+            
+            $.ajax({
+                url: '<?php echo admin_url('admin-ajax.php'); ?>',
+                type: 'POST',
+                data: {
+                    action: 'send_password_reset',
+                    email: $('#reset-email').val(),
+                    nonce: '<?php echo wp_create_nonce('custom_login_nonce'); ?>'
+                },
+                success: function(response) {
+                    if (response.success) {
+                        showMessage('#forgot-password-step', response.data.message, 'success');
+                        $('#reset-email').val('');
+                    } else {
+                        showMessage('#forgot-password-step', response.data.message, 'error');
+                    }
+                }
+            });
+        });
+
+        // Reset password form submission
+        $('#reset-password-form').on('submit', function(e) {
+            e.preventDefault();
+            
+            const newPassword = $('#reset-new-password').val();
+            const confirmPassword = $('#reset-confirm-password').val();
+            
+            if (newPassword !== confirmPassword) {
+                showMessage('#reset-password-step', 'Passwords do not match', 'error');
+                return;
+            }
+            
+            $.ajax({
+                url: '<?php echo admin_url('admin-ajax.php'); ?>',
+                type: 'POST',
+                data: {
+                    action: 'reset_user_password',
+                    key: $('#reset-key').val(),
+                    login: $('#reset-login').val(),
+                    password: newPassword,
+                    nonce: '<?php echo wp_create_nonce('custom_login_nonce'); ?>'
+                },
+                success: function(response) {
+                    if (response.success) {
+                        showMessage('#reset-password-step', 'Password reset successfully! Redirecting to login...', 'success');
+                        setTimeout(function() {
+                            window.location.href = '<?php echo home_url('/account'); ?>';
+                        }, 2000);
+                    } else {
+                        showMessage('#reset-password-step', response.data.message, 'error');
+                    }
+                }
+            });
+        });
+
         // Step 1: Email Check
         $('#email-form').on('submit', function(e) {
             e.preventDefault();
@@ -302,7 +408,8 @@ function custom_login_form_shortcode() {
         });
 
         // Back to email button
-        $('#back-to-email').on('click', function() {
+        $('#back-to-email').on('click', function(e) {
+            e.preventDefault();
             showStep('email-step');
             $('#user-email').val('');
             $('#user-password').val('');
@@ -402,6 +509,77 @@ function ajax_custom_user_login() {
     wp_clear_auth_cookie();
     wp_set_current_user($user->ID);
     wp_set_auth_cookie($user->ID);
+    
+    wp_send_json_success();
+}
+
+// 7. AJAX: SEND PASSWORD RESET EMAIL
+add_action('wp_ajax_send_password_reset', 'ajax_send_password_reset');
+add_action('wp_ajax_nopriv_send_password_reset', 'ajax_send_password_reset');
+function ajax_send_password_reset() {
+    check_ajax_referer('custom_login_nonce', 'nonce');
+    
+    $email = sanitize_email($_POST['email']);
+    $user = get_user_by('email', $email);
+    
+    if (!$user) {
+        wp_send_json_error(array('message' => 'No account found with this email.'));
+    }
+    
+    // Generate reset key
+    $reset_key = get_password_reset_key($user);
+    
+    if (is_wp_error($reset_key)) {
+        wp_send_json_error(array('message' => 'Could not generate reset key.'));
+    }
+    
+    // Create reset link
+    $reset_url = home_url('/account') . '?key=' . $reset_key . '&login=' . rawurlencode($user->user_login);
+    
+    // Send email
+    $subject = 'Password Reset Request';
+    $message = "Hi,\n\n";
+    $message .= "You requested a password reset. Click the link below to reset your password:\n\n";
+    $message .= $reset_url . "\n\n";
+    $message .= "This link will expire in 1 hour.\n\n";
+    $message .= "If you didn't request this, please ignore this email.\n\n";
+    $message .= "Thanks!";
+    
+    $sent = wp_mail($email, $subject, $message);
+    
+    if ($sent) {
+        wp_send_json_success(array('message' => 'Reset link sent! Check your email.'));
+    } else {
+        wp_send_json_error(array('message' => 'Could not send email. Please try again.'));
+    }
+}
+
+// 8. AJAX: RESET PASSWORD WITH KEY
+add_action('wp_ajax_reset_user_password', 'ajax_reset_user_password');
+add_action('wp_ajax_nopriv_reset_user_password', 'ajax_reset_user_password');
+function ajax_reset_user_password() {
+    check_ajax_referer('custom_login_nonce', 'nonce');
+    
+    $key = sanitize_text_field($_POST['key']);
+    $login = sanitize_text_field($_POST['login']);
+    $password = $_POST['password'];
+    
+    if (strlen($password) < 8) {
+        wp_send_json_error(array('message' => 'Password must be at least 8 characters.'));
+    }
+    
+    // Check reset key
+    $user = check_password_reset_key($key, $login);
+    
+    if (is_wp_error($user)) {
+        wp_send_json_error(array('message' => 'Invalid or expired reset link.'));
+    }
+    
+    // Reset password
+    reset_password($user, $password);
+    
+    // Mark password as set
+    update_user_meta($user->ID, '_password_set', true);
     
     wp_send_json_success();
 }
