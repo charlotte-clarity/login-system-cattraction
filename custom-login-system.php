@@ -126,7 +126,7 @@ function custom_login_form_shortcode() {
 
         .account-form-container label {
             font-size: 16px;
-            margin-bottom: -10px;
+            margin-bottom: 0px;
         }
 
         .account-form-container a {
@@ -226,6 +226,10 @@ function custom_login_form_shortcode() {
             display: flex;
             align-items: center;
             box-sizing: border-box;
+        }
+
+        .account-form-container .login-step.active p.user-email-display {
+            margin-bottom: -7px;
         }
     </style>
 
