@@ -53,9 +53,9 @@ function custom_login_form_shortcode() {
             <!-- Step 3: Login (Returning users) -->
             <div id="login-step" class="login-step">
                 <label>Welcome back! Please enter your password.</label>
+                <p class="user-email-display"></p>
                 <form id="login-form">
                     <input type="hidden" id="login-email" name="user_email">
-                    <p class="user-email-display"></p>
                     <input type="password" id="user-password" name="user_password" placeholder="Enter your password" required>
                     <button type="submit" class="submit-btn">Login</button>
                     <div class="message"></div>
@@ -187,11 +187,21 @@ function custom_login_form_shortcode() {
         }
 
         .user-email-display {
-            font-weight: bold;
+            font-weight: normal;
             margin: 0;
-            text-align: center;
-            font-size: 14px;
-            opacity: 0.8;
+            text-align: left;
+            font-size: 16px;
+            color: #fff;
+            background: rgba(255, 255, 255, 0.15);
+            backdrop-filter: blur(4px);
+            -webkit-backdrop-filter: blur(4px);
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            padding: 12px;
+            border-radius: 10px;
+            height: 45px;
+            display: flex;
+            align-items: center;
+            box-sizing: border-box;
         }
     </style>
 
