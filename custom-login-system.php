@@ -1,8 +1,27 @@
 <?php
 
+// ELEMENTOR CONTEXT CHECK
+function is_elementor_context() {
+    // Check various Elementor conditions
+    if (isset($_GET['elementor-preview'])) return true;
+    if (isset($_GET['elementor_library'])) return true;
+    if (isset($_GET['action']) && $_GET['action'] == 'elementor') return true;
+    if (isset($_POST['action']) && $_POST['action'] == 'elementor_ajax') return true;
+    if (defined('ELEMENTOR_VERSION') && class_exists('\Elementor\Plugin')) {
+        if (\Elementor\Plugin::$instance->preview->is_preview_mode()) return true;
+        if (\Elementor\Plugin::$instance->editor->is_edit_mode()) return true;
+    }
+    return false;
+}
+
 // 1. REDIRECT LOGGED-IN USERS FROM /account TO /dashboard
 add_action('template_redirect', 'custom_redirect_logged_in_users');
 function custom_redirect_logged_in_users() {
+    // Don't redirect in Elementor
+    if (is_elementor_context()) {
+        return;
+    }
+    
     if (is_page('account') && is_user_logged_in()) {
         wp_redirect(home_url('/dashboard'));
         exit;
@@ -19,6 +38,11 @@ function custom_logout_redirect() {
 // 3. SHORTCODE FOR LOGIN FORM
 add_shortcode('custom_login_form', 'custom_login_form_shortcode');
 function custom_login_form_shortcode() {
+    // Don't render in Elementor
+    if (is_elementor_context()) {
+        return '<div style="padding: 20px; background: #f0f0f0; border: 2px dashed #ccc; text-align: center;">Custom Login Form (hidden in editor)</div>';
+    }
+    
     ob_start();
     ?>
     <div class="account-page-custom">
