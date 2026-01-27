@@ -25,113 +25,173 @@ add_shortcode('custom_login_form', 'custom_login_form_shortcode');
 function custom_login_form_shortcode() {
     ob_start();
     ?>
-    <div id="custom-login-wrapper">
-        <!-- Step 1: Email Input -->
-        <div id="email-step" class="login-step active">
-            <h2>Account Login</h2>
-            <form id="email-form">
-                <input type="email" id="user-email" name="user_email" placeholder="Enter your email" required>
-                <button type="submit">Continue</button>
-                <div class="message"></div>
-            </form>
-        </div>
+    <div class="account-page-custom">
+        <div class="account-form-container" id="custom-login-wrapper">
+            <!-- Step 1: Email Input -->
+            <div id="email-step" class="login-step active">
+                <label for="user-email">Please enter your email to log in.</label>
+                <form id="email-form">
+                    <input type="email" id="user-email" name="user_email" placeholder="Email" required>
+                    <button type="submit" class="submit-btn">Submit</button>
+                    <div class="message"></div>
+                </form>
+                <a href="#">Forgot password?</a>
+            </div>
 
-        <!-- Step 2: Set Password (First-time users) -->
-        <div id="set-password-step" class="login-step">
-            <h2>Set Your Password</h2>
-            <p>Welcome! Please set a password for your account.</p>
-            <form id="set-password-form">
-                <input type="hidden" id="set-pass-email" name="user_email">
-                <input type="password" id="new-password" name="new_password" placeholder="New Password (min 8 characters)" required minlength="8">
-                <input type="password" id="confirm-password" name="confirm_password" placeholder="Confirm Password" required minlength="8">
-                <button type="submit">Set Password</button>
-                <div class="message"></div>
-            </form>
-        </div>
+            <!-- Step 2: Set Password (First-time users) -->
+            <div id="set-password-step" class="login-step">
+                <label>Welcome! Please set a password for your account.</label>
+                <form id="set-password-form">
+                    <input type="hidden" id="set-pass-email" name="user_email">
+                    <input type="password" id="new-password" name="new_password" placeholder="New Password (min 8 characters)" required minlength="8">
+                    <input type="password" id="confirm-password" name="confirm_password" placeholder="Confirm Password" required minlength="8">
+                    <button type="submit" class="submit-btn">Set Password</button>
+                    <div class="message"></div>
+                </form>
+            </div>
 
-        <!-- Step 3: Login (Returning users) -->
-        <div id="login-step" class="login-step">
-            <h2>Welcome Back</h2>
-            <form id="login-form">
-                <input type="hidden" id="login-email" name="user_email">
-                <p class="user-email-display"></p>
-                <input type="password" id="user-password" name="user_password" placeholder="Enter your password" required>
-                <button type="submit">Login</button>
-                <button type="button" id="back-to-email" class="back-btn">Use different email</button>
-                <div class="message"></div>
-            </form>
+            <!-- Step 3: Login (Returning users) -->
+            <div id="login-step" class="login-step">
+                <label>Welcome back! Please enter your password.</label>
+                <form id="login-form">
+                    <input type="hidden" id="login-email" name="user_email">
+                    <p class="user-email-display"></p>
+                    <input type="password" id="user-password" name="user_password" placeholder="Enter your password" required>
+                    <button type="submit" class="submit-btn">Login</button>
+                    <div class="message"></div>
+                </form>
+                <a href="#" id="back-to-email">Use different email</a>
+            </div>
         </div>
     </div>
 
     <style>
-        #custom-login-wrapper {
-            max-width: 400px;
-            margin: 50px auto;
-            padding: 30px;
-            background: #fff;
-            border-radius: 8px;
-            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+        .account-page-custom {
+            background-color: black;
+            width: 100vw;
+            height: 100vh;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            background-size: cover;
+            background-position: center;
+            background-image: radial-gradient(circle, rgba(255, 255, 255, 0) 0%, rgba(0, 0, 0, 1) 100%), url('https://i.ibb.co/1fSyw0z2/27.jpg');
+            position: fixed;
+            top: 0;
+            left: 0;
+            z-index: 9999;
         }
+
+        .account-form-container {
+            width: 500px;
+            max-width: 90%;
+            height: auto;
+            display: flex;
+            flex-direction: column;
+            gap: 20px !important;
+            padding: 30px 20px 40px;
+            background: rgba(78, 77, 77, 0.21);
+            box-shadow: rgba(0, 0, 0, 0.1) 0px 4px 12px;
+            backdrop-filter: blur(6.2px);
+            -webkit-backdrop-filter: blur(6.2px);
+            border: 1px solid rgba(78, 77, 77, 0.31);
+            border-radius: 24px;
+            overflow: hidden;
+            color: #fff;
+        }
+
+        .account-form-container label {
+            font-size: 16px;
+            margin-bottom: -10px;
+        }
+
+        .account-form-container a {
+            color: #fff;
+            text-decoration: none;
+            text-align: center;
+            font-size: 14px;
+            cursor: pointer;
+        }
+
+        .account-form-container a:hover {
+            text-decoration: underline;
+        }
+
+        .account-form-container input {
+            width: 100%;
+            height: 45px;
+            border-radius: 10px;
+            padding: 12px;
+            outline: none;
+            border: 0;
+            box-sizing: border-box;
+            font-size: 16px;
+        }
+
+        .account-form-container input:focus {
+            border: 0;
+            outline: none;
+        }
+
+        .account-form-container button.submit-btn {
+            width: 100%;
+            height: 45px;
+            border-radius: 10px;
+            border: 0;
+            cursor: pointer;
+            background-color: #875f45;
+            color: #efece5;
+            transition: background-color 0.1s ease-in;
+            font-size: 16px;
+            font-weight: 500;
+        }
+
+        .account-form-container button.submit-btn:hover {
+            background-color: #443023;
+        }
+
         .login-step {
             display: none;
         }
+
         .login-step.active {
-            display: block;
+            display: flex;
+            flex-direction: column;
+            gap: 20px;
         }
-        #custom-login-wrapper h2 {
-            margin-bottom: 20px;
-            font-size: 24px;
+
+        .login-step form {
+            display: flex;
+            flex-direction: column;
+            gap: 15px;
         }
-        #custom-login-wrapper input[type="email"],
-        #custom-login-wrapper input[type="password"] {
-            width: 100%;
-            padding: 12px;
-            margin-bottom: 15px;
-            border: 1px solid #ddd;
-            border-radius: 4px;
-            font-size: 16px;
-            box-sizing: border-box;
-        }
-        #custom-login-wrapper button {
-            width: 100%;
-            padding: 12px;
-            background: #0073aa;
-            color: #fff;
-            border: none;
-            border-radius: 4px;
-            font-size: 16px;
-            cursor: pointer;
-            margin-bottom: 10px;
-        }
-        #custom-login-wrapper button:hover {
-            background: #005a87;
-        }
-        #custom-login-wrapper .back-btn {
-            background: #f0f0f0;
-            color: #333;
-        }
-        #custom-login-wrapper .back-btn:hover {
-            background: #ddd;
-        }
+
         .message {
-            margin-top: 15px;
-            padding: 10px;
-            border-radius: 4px;
+            padding: 12px;
+            border-radius: 10px;
             display: none;
+            font-size: 14px;
+            text-align: center;
         }
+
         .message.success {
-            background: #d4edda;
+            background: rgba(212, 237, 218, 0.9);
             color: #155724;
             display: block;
         }
+
         .message.error {
-            background: #f8d7da;
+            background: rgba(248, 215, 218, 0.9);
             color: #721c24;
             display: block;
         }
+
         .user-email-display {
             font-weight: bold;
-            margin-bottom: 15px;
+            margin: 0;
+            text-align: center;
+            font-size: 14px;
+            opacity: 0.8;
         }
     </style>
 
