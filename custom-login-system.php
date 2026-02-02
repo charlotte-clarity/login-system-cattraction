@@ -623,16 +623,97 @@ function ajax_send_password_reset() {
     // Create reset link
     $reset_url = home_url('/account') . '?key=' . $reset_key . '&login=' . rawurlencode($user->user_login);
     
-    // Send email
-    $subject = 'Password Reset Request';
-    $message = "Hi,\n\n";
-    $message .= "You requested a password reset. Click the link below to reset your password:\n\n";
-    $message .= $reset_url . "\n\n";
-    $message .= "This link will expire in 1 hour.\n\n";
-    $message .= "If you didn't request this, please ignore this email.\n\n";
-    $message .= "Thanks!";
+    // Logo URL
+    $logo_url = home_url('/wp-content/uploads/2026/01/cattraction-stacked-logo-black-favicon.png');
     
-    $sent = wp_mail($email, $subject, $message);
+    // HTML Email Template
+    $subject = 'Reset Your Password';
+    $message = '
+    <!DOCTYPE html>
+    <html>
+    <head>
+        <meta charset="UTF-8">
+        <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    </head>
+    <body style="margin: 0; padding: 0; background-color: #f4f4f4;">
+        <table width="100%" cellpadding="0" cellspacing="0" border="0" style="background-color: #f4f4f4; padding: 20px 0;">
+            <tr>
+                <td align="center">
+                    <table width="600" cellpadding="0" cellspacing="0" border="0" style="background-color: #ffffff; max-width: 600px; padding: 40px 20px;">
+                        <!-- Logo -->
+                        <tr>
+                            <td style="padding-bottom: 40px;">
+                                <img src="' . esc_url($logo_url) . '" alt="Cattraction" style="width: 100px; height: auto; display: block;">
+                            </td>
+                        </tr>
+                        
+                        <!-- Main Heading -->
+                        <tr>
+                            <td style="padding-bottom: 40px;">
+                                <h1 style="font-family: \'Cabin\', Arial, Helvetica, sans-serif; font-size: 24px; margin: 0; color: #000;">Reset Your Password</h1>
+                            </td>
+                        </tr>
+                        
+                        <!-- Body Text -->
+                        <tr>
+                            <td style="padding-bottom: 40px;">
+                                <p style="font-family: \'Lato\', Arial, Helvetica, sans-serif; margin: 0; color: #333; line-height: 1.6; font-size: 16px;">
+                                    We received a request to reset your password. If this was you, please click the button below to set a new password.
+                                </p>
+                            </td>
+                        </tr>
+                        
+                        <!-- Reset Button -->
+                        <tr>
+                            <td style="padding-bottom: 40px;">
+                                <table cellpadding="0" cellspacing="0" border="0">
+                                    <tr>
+                                        <td style="background-color: #463937; border-radius: 12px; padding: 14px 19px;">
+                                            <a href="' . esc_url($reset_url) . '" style="font-family: \'Lato\', Arial, Helvetica, sans-serif; color: #ffffff; text-decoration: none; font-size: 16px; display: block;">
+                                                Reset password →
+                                            </a>
+                                        </td>
+                                    </tr>
+                                </table>
+                            </td>
+                        </tr>
+                        
+                        <!-- Expiry Notice -->
+                        <tr>
+                            <td style="padding-bottom: 40px;">
+                                <p style="font-family: \'Lato\', Arial, Helvetica, sans-serif; margin: 0; color: #333; line-height: 1.6; font-size: 16px;">
+                                    This link will expire in 1 hour.
+                                </p>
+                            </td>
+                        </tr>
+                        
+                        <!-- Divider -->
+                        <tr>
+                            <td style="padding-bottom: 40px;">
+                                <div style="border-top: 1px solid #eeeeee;"></div>
+                            </td>
+                        </tr>
+                        
+                        <!-- Footer Text -->
+                        <tr>
+                            <td>
+                                <p style="font-family: \'Lato\', Arial, Helvetica, sans-serif; margin: 0; color: #666; line-height: 1.6; font-size: 14px;">
+                                    This email was sent you because a password reset was requested for your account. If you did not request this, you can safely ignore this email.
+                                </p>
+                            </td>
+                        </tr>
+                    </table>
+                </td>
+            </tr>
+        </table>
+    </body>
+    </html>
+    ';
+    
+    // Set email headers for HTML
+    $headers = array('Content-Type: text/html; charset=UTF-8');
+    
+    $sent = wp_mail($email, $subject, $message, $headers);
     
     if ($sent) {
         wp_send_json_success(array('message' => 'Reset link sent! Check your email.'));
